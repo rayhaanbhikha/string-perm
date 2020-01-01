@@ -8,7 +8,11 @@ type Result struct {
 }
 
 func (r *Result) setChar(index int, c Character) {
-	r.current = append(r.current, c.v)
+	if len(r.current)-1 < index {
+		r.current = append(r.current, c.v)
+	} else {
+		r.current[index] = c.v
+	}
 }
 
 func (r *Result) storeCurrent() {
@@ -24,35 +28,6 @@ type Character struct {
 	w int
 }
 
-type CurrentChars struct {
-	CurrentIndex int
-	Chars        []Character
-}
-
-func (c *CurrentChars) val() Character {
-	return c.Chars[c.CurrentIndex]
-}
-
-func (c *CurrentChars) next() bool {
-	if c.CurrentIndex == len(c.Chars)-1 {
-		return false
-	}
-	for index := range c.Chars {
-		if index == c.CurrentIndex {
-			c.Chars[index].w--
-		}
-	}
-
-	for index, v := range c.Chars {
-		if v.w > 0 {
-			c.CurrentIndex = index
-			return true
-		}
-	}
-	return false
-}
-
-
 func getChars(str string) []Character {
 	chars := make([]Character, 0)
 	for _, s := range str {
@@ -65,47 +40,45 @@ func getChars(str string) []Character {
 	return chars
 }
 
-var result = &Result{}
+var result = &Result{current: make([]byte, 0)}
 
 func main() {
 	chars := getChars("aabc")
-	cChars := &CurrentChars{Chars: chars}
-	perm(cChars, 0)
+	// cChars := &CurrentChars{Chars: chars}
+	perm(chars, 0, 0)
+	fmt.Println(result)
 
-	// fmt.Println(cChars)
-	// fmt.Println(cChars.next())
-
-	// fmt.Println(cChars)
-	// fmt.Println(cChars.next())
-
-	// fmt.Println(cChars)
-	// fmt.Println(cChars.next())
-
-	// fmt.Println(cChars)
-
-	// fmt.Println(cChars.next())
-	// fmt.Println(cChars)
-	// perm(chars, 0)
-	// fmt.Println(chars)
 }
 
-func perm(cChars *CurrentChars, recursionDepth int) {
-	result.setChar(recursionDepth, cChars.val())
-	fmt.Println(result)
+func newChars(chars []Character, currentIndex int) ([]Character, int, bool) {
+	// index already on final string.
+	if currentIndex == len(chars) - 1 {
+		return []Character{}, 0, false
+	}
 
-	recursionDepth++
-	cChars.next()
-	result.setChar(recursionDepth, cChars.val())
-	fmt.Println(result)
+	for index := range chars {
+		if index == currentIndex {
+			chars[index].w--
+		}
+	}
 
-	recursionDepth++
-	cChars.next()
-	result.setChar(recursionDepth, cChars.val())
-	fmt.Println(result)
+	for index, v := range chars {
+		if v.w > 0 {
+			currentIndex = index
+			return chars, currentIndex, true
+		}
+	}
 
+	return []Character{}, 0, false
+}
+
+func perm(chars []Character, currentIndex, recursionDepth int) {
+	fmt.Println(currentIndex, chars)
+	result.setChar(recursionDepth, chars[currentIndex])
+	chars, currentIndex, successful := newChars(chars, currentIndex)
+	if !successful {
+		return
+	}
 	recursionDepth++
-	cChars.next()
-	result.setChar(recursionDepth, cChars.val())
-	fmt.Println(result)
-	
+	perm(chars, currentIndex, recursionDepth)
 }
