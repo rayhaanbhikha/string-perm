@@ -4,7 +4,7 @@ import "fmt"
 
 type Result struct {
 	collections [][]byte
-	current     []byte
+	current     []Character
 }
 
 type Character struct {
@@ -12,22 +12,22 @@ type Character struct {
 	weight int
 }
 
-func contains(arr []*Character, v byte) (*Character, bool) {
-	for _, c := range arr {
+func contains(arr []Character, v byte) (int, bool) {
+	for index, c := range arr {
 		if c.value == v {
-			return c, true
+			return index, true
 		}
 	}
-	return nil, false
+	return 0, false
 }
 
-func getChars(str string) []*Character {
-	chars := make([]*Character, 0)
+func getChars(str string) []Character {
+	chars := make([]Character, 0)
 	for _, s := range str {
-		if c, ok := contains(chars, byte(s)); ok {
-			c.weight++
+		if charIndex, ok := contains(chars, byte(s)); ok {
+			chars[charIndex].weight++
 		} else {
-			chars = append(chars, &Character{byte(s), 1})
+			chars = append(chars, Character{byte(s), 1})
 		}
 	}
 	return chars
